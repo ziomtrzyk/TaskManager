@@ -1,6 +1,80 @@
 @TaskManager_HostAddress = http://localhost:5196
 
-GET {{TaskManager_HostAddress}}/weatherforecast/
+GET {{TaskManager_HostAddress}}/projects/
 Accept: application/json
 
 ###
+
+GET {{TaskManager_HostAddress}}/projects/1
+Accept: application/json
+
+###
+
+POST {{TaskManager_HostAddress}}/projects/
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Learn German",
+    "description": "Naczyc sie niemieckiego w stopniu komunikatywnym"
+}
+###
+
+PUT {{TaskManager_HostAddress}}/projects/2
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Learn German",
+    "description": "Naczyc sie niemieckiego w stopniu komunikatywnym i pisemnym"
+}
+
+###
+DELETE {{TaskManager_HostAddress}}/projects/3
+Accept: application/json
+
+###
+GET {{TaskManager_HostAddress}}/tasks/
+Accept: application/json
+
+###
+GET {{TaskManager_HostAddress}}/tasks/1
+Accept: application/json
+
+###
+POST {{TaskManager_HostAddress}}/tasks/
+Content-Type: application/json
+Accept: application/json
+
+{
+    "title": "poniedzialek",
+    "projectid": 1
+}
+
+###
+PUT {{TaskManager_HostAddress}}/tasks/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "title": "jednak wtorek",
+    "projectid": 1
+}
+
+###
+DELETE {{TaskManager_HostAddress}}/tasks/1
+Accept: application/json
+
+###
+POST {{TaskManager_HostAddress}}/tasks/
+Content-Type: application/json
+Accept: application/json
+
+{
+    "title": "poniedzialek",
+    "projectid": 3
+}
+
+###
+GET {{TaskManager_HostAddress}}/projects/1/tasks
+Accept: application/json

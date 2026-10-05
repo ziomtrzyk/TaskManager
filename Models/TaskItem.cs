@@ -10,7 +10,7 @@ public class TaskItem
     public TaskState Status { get; set; } = TaskState.ToDo;
     public DateTime? DueDate { get; set; }
     public int ProjectId { get; set; }
-    public Project Project { get; set; } = null!;
+    public Project? Project { get; set; }
 
 
 }
