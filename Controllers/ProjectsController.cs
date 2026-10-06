@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Data;
-using TaskManager.Models;
+using TaskManager.Dtos;
+using TaskManager.Mappings;
 
 namespace TaskManager.Controllers;
 
@@ -10,43 +11,44 @@ namespace TaskManager.Controllers;
 public class ProjectsController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<Project>>> GetAll()
-    => await db.Projects.ToListAsync();
+    public async Task<ActionResult<List<ProjectDto>>> GetAll()
+    => await db.Projects.Select(p => p.ToDto()).ToListAsync();
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Project>> GetById(int id)
+    public async Task<ActionResult<ProjectDto>> GetById(int id)
     {
         var project = await db.Projects.FindAsync(id);
-        return project is null ? NotFound() : project;
+        return project is null ? NotFound() : project.ToDto();
     }
     [HttpGet("{id}/tasks")]
-    public async Task<ActionResult<List<TaskItem>>> GetAllFromProject(int id)
+    public async Task<ActionResult<List<TaskDto>>> GetAllFromProject(int id)
     {
         if (!await db.Projects.AnyAsync(p => p.Id == id))
             return NotFound();
 
         return await db.TaskItems
         .Where(t => t.ProjectId == id)
+        .Select(t => t.ToDto())
         .ToListAsync();
     }
 
 
     [HttpPost]
-    public async Task<ActionResult<Project>> Create(Project project)
+    public async Task<ActionResult<ProjectDto>> Create(CreateProjectDto input)
     {
+        var project = input.ToProject();
         db.Projects.Add(project);
         await db.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { id = project.Id }, project);
+        return CreatedAtAction(nameof(GetById), new { id = project.Id }, project.ToDto());
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, Project input)
+    public async Task<ActionResult> Update(int id, CreateProjectDto input)
     {
         var project = await db.Projects.FindAsync(id);
         if (project is null) return NotFound();
 
-        project.Name = input.Name;
-        project.Description = input.Description;
+        project.UpdateProject(input);
 
         await db.SaveChangesAsync();
         return NoContent();
