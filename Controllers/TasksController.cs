@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Data;
 using TaskManager.Models;
+using TaskManager.Mappings;
+using TaskManager.Dtos;
 
 namespace TaskManager.Controllers;
 
@@ -10,33 +12,34 @@ namespace TaskManager.Controllers;
 public class TasksController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<TaskItem>>> GetAll()
+    public async Task<ActionResult<List<TaskDto>>> GetAll()
     {
-        return await db.TaskItems.ToListAsync();
+        return await db.TaskItems.Select(t => t.ToDto()).ToListAsync();
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TaskItem>> GetById(int id)
+    public async Task<ActionResult<TaskDto>> GetById(int id)
     {
         var taskItem = await db.TaskItems.FindAsync(id);
 
         if (taskItem is null)
             return NotFound();
 
-        return taskItem;
+        return taskItem.ToDto();
     }
     [HttpPost]
-    public async Task<ActionResult> Create(TaskItem taskItem)
+    public async Task<ActionResult<TaskDto>> Create(CreateTaskDto input)
     {
-        if (!await db.Projects.AnyAsync(t => t.Id == taskItem.ProjectId))
+        if (!await db.Projects.AnyAsync(p => p.Id == input.ProjectId))
             return BadRequest("The project does not exist.");
 
+        var taskItem = input.ToTaskItem();
         db.TaskItems.Add(taskItem);
         await db.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { id = taskItem.Id }, taskItem);
+        return CreatedAtAction(nameof(GetById), new { id = taskItem.Id }, taskItem.ToDto());
     }
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, TaskItem input)
+    public async Task<ActionResult> Update(int id, CreateTaskDto input)
     {
         var taskItem = await db.TaskItems.FindAsync(id);
         if (taskItem is null)
@@ -44,10 +47,8 @@ public class TasksController(AppDbContext db) : ControllerBase
 
         if (!await db.Projects.AnyAsync(p => p.Id == input.ProjectId))
             return BadRequest("The project does not exist.");
-        taskItem.Title = input.Title;
-        taskItem.Status = input.Status;
-        taskItem.DueDate = input.DueDate;
-        taskItem.ProjectId = input.ProjectId;
+        
+        taskItem.UpdateItem(input);
 
         await db.SaveChangesAsync();
         return NoContent();

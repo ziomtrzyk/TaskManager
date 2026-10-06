@@ -47,7 +47,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "title": "poniedzialek",
+    "title": "sroda",
     "projectid": 1
 }
 
@@ -78,3 +78,15 @@ Accept: application/json
 ###
 GET {{TaskManager_HostAddress}}/projects/1/tasks
 Accept: application/json
+
+###
+
+POST {{TaskManager_HostAddress}}/tasks/
+Content-Type: application/json
+Accept: application/json
+
+{
+    "title": "poniedzialek",
+    "projectid": 1,
+    "dueDate": "2020-01-01"
+}
