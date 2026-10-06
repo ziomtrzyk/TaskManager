@@ -32,7 +32,7 @@ namespace TaskManager.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("TaskManager.Models.TaskItem", b =>
@@ -58,7 +58,7 @@ namespace TaskManager.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("TaskItems");
+                    b.ToTable("TaskItems", (string)null);
                 });
 
             modelBuilder.Entity("TaskManager.Models.TaskItem", b =>
