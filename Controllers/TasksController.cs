@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Dtos;
 using TaskManager.Services;
@@ -10,9 +11,9 @@ namespace TaskManager.Controllers;
 public class TasksController(ITaskService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<TaskDto>>> GetAll()
+    public async Task<ActionResult<List<TaskDto>>> GetAll([FromQuery]TaskQuery taskQuery)
     {
-        return await service.GetAllAsync();
+        return await service.GetAllAsync(taskQuery);
     }
 
     [HttpGet("{id}")]

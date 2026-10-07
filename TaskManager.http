@@ -90,3 +90,7 @@ Accept: application/json
     "projectid": 1,
     "dueDate": "2020-01-01"
 }
+
+###
+GET {{TaskManager_HostAddress}}/tasks?orderBy=duedate
+Accept: application/json

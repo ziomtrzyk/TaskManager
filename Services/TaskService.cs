@@ -1,5 +1,4 @@
 
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Data;
 using TaskManager.Dtos;
@@ -11,9 +10,21 @@ namespace TaskManager.Services;
 public class TaskService(AppDbContext db) : ITaskService
 
 {
-    public async Task<List<TaskDto>> GetAllAsync()
+    public async Task<List<TaskDto>> GetAllAsync(TaskQuery taskQuery)
     {
-        return await db.TaskItems.Select(t => t.ToDto()).ToListAsync();
+        var query = db.TaskItems.AsQueryable();
+        if (taskQuery.ProjectId is not null)
+            query = query.Where(t => t.ProjectId == taskQuery.ProjectId);
+        if (taskQuery.Status is not null)
+            query = query.Where(t => t.Status == taskQuery.Status);
+        query = taskQuery.OrderBy?.ToLower() switch
+        {
+            "status" => query.OrderBy(t => t.Status),
+            "title" => query.OrderBy(t => t.Title),
+            "duedate" => query.OrderBy(t => t.DueDate == null).ThenBy(t => t.DueDate),
+            _ => query.OrderBy(t => t.Id)
+        };
+        return await query.Select(t => t.ToDto()).ToListAsync();
     }
 
     public async Task<TaskDto?> GetByIdAsync(int id)
