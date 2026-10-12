@@ -1,96 +1,285 @@
 @TaskManager_HostAddress = http://localhost:5196
 
-GET {{TaskManager_HostAddress}}/projects/
-Accept: application/json
+############################################################
+# AUTH
+############################################################
 
-###
+### Rejestracja -> 201
+POST {{TaskManager_HostAddress}}/auth/register
+Content-Type: application/json
 
+{
+    "username": "bartek",
+    "password": "haslo123"
+}
+
+### Ta sama nazwa drugi raz -> 409
+POST {{TaskManager_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "bartek",
+    "password": "innehaslo"
+}
+
+### Drugi uzytkownik z TYM SAMYM haslem -> 201 (porownaj hashe w bazie)
+POST {{TaskManager_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "anna",
+    "password": "haslo123"
+}
+
+### Za krotkie haslo -> 400
+POST {{TaskManager_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "jan",
+    "password": "abc"
+}
+
+### Za krotka nazwa -> 400
+POST {{TaskManager_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "ab",
+    "password": "haslo123"
+}
+
+### Brak hasla -> 400
+POST {{TaskManager_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "jan"
+}
+
+### Logowanie poprawne -> 200 + token
+# @name login
+POST {{TaskManager_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "bartek",
+    "password": "haslo123"
+}
+
+### Zle haslo -> 401 (odpowiedz identyczna jak nizej)
+POST {{TaskManager_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "bartek",
+    "password": "zlehaslo"
+}
+
+### Nieistniejacy uzytkownik -> 401 (odpowiedz identyczna jak wyzej)
+POST {{TaskManager_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "nieistnieje",
+    "password": "haslo123"
+}
+
+### Logowanie z pustym haslem -> 400
+POST {{TaskManager_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "bartek",
+    "password": ""
+}
+
+############################################################
+# PROJEKTY
+# Uwaga: POST /projects zwroci 500 do czesci D (brak UserId)
+############################################################
+
+### Lista projektow -> 200
+GET {{TaskManager_HostAddress}}/projects
+
+### Projekt po id -> 200
 GET {{TaskManager_HostAddress}}/projects/1
-Accept: application/json
 
-###
+### Nieistniejacy projekt -> 404
+GET {{TaskManager_HostAddress}}/projects/999
 
-POST {{TaskManager_HostAddress}}/projects/
+### Nowy projekt -> 201 (po czesci D)
+POST {{TaskManager_HostAddress}}/projects
 Content-Type: application/json
-Accept: application/json
 
 {
     "name": "Learn German",
-    "description": "Naczyc sie niemieckiego w stopniu komunikatywnym"
+    "description": "Nauczyc sie niemieckiego w stopniu komunikatywnym"
 }
-###
 
-PUT {{TaskManager_HostAddress}}/projects/2
+### Projekt bez nazwy -> 400
+POST {{TaskManager_HostAddress}}/projects
 Content-Type: application/json
-Accept: application/json
+
+{
+    "description": "Brak nazwy"
+}
+
+### Edycja projektu -> 204
+PUT {{TaskManager_HostAddress}}/projects/1
+Content-Type: application/json
 
 {
     "name": "Learn German",
-    "description": "Naczyc sie niemieckiego w stopniu komunikatywnym i pisemnym"
+    "description": "Nauczyc sie niemieckiego w stopniu komunikatywnym i pisemnym"
 }
 
-###
+### Edycja nieistniejacego projektu -> 404
+PUT {{TaskManager_HostAddress}}/projects/999
+Content-Type: application/json
+
+{
+    "name": "Nie istnieje"
+}
+
+### Zadania projektu -> 200
+GET {{TaskManager_HostAddress}}/projects/1/tasks
+
+### Zadania nieistniejacego projektu -> 404
+GET {{TaskManager_HostAddress}}/projects/999/tasks
+
+### Usuniecie projektu -> 204 (powtorzone -> 404)
 DELETE {{TaskManager_HostAddress}}/projects/3
-Accept: application/json
 
-###
-GET {{TaskManager_HostAddress}}/tasks/
-Accept: application/json
+############################################################
+# ZADANIA
+############################################################
 
-###
+### Lista zadan -> 200
+GET {{TaskManager_HostAddress}}/tasks
+
+### Zadanie po id -> 200
 GET {{TaskManager_HostAddress}}/tasks/1
-Accept: application/json
 
-###
-POST {{TaskManager_HostAddress}}/tasks/
+### Nieistniejace zadanie -> 404
+GET {{TaskManager_HostAddress}}/tasks/999
+
+### Nowe zadanie -> 201
+POST {{TaskManager_HostAddress}}/tasks
 Content-Type: application/json
-Accept: application/json
 
 {
     "title": "sroda",
-    "projectid": 1
+    "projectId": 1,
+    "dueDate": "2030-01-01T10:00:00Z"
 }
 
-###
-PUT {{TaskManager_HostAddress}}/tasks/1
+### Zadanie bez statusu -> 201, status = 0 (ToDo)
+POST {{TaskManager_HostAddress}}/tasks
 Content-Type: application/json
-Accept: application/json
 
 {
-    "title": "jednak wtorek",
-    "projectid": 1
+    "title": "bez statusu",
+    "projectId": 1
 }
 
-###
-DELETE {{TaskManager_HostAddress}}/tasks/1
-Accept: application/json
-
-###
-POST {{TaskManager_HostAddress}}/tasks/
+### Zadanie do nieistniejacego projektu -> 400
+POST {{TaskManager_HostAddress}}/tasks
 Content-Type: application/json
-Accept: application/json
 
 {
     "title": "poniedzialek",
-    "projectid": 3
+    "projectId": 999
 }
 
-###
-GET {{TaskManager_HostAddress}}/projects/1/tasks
-Accept: application/json
-
-###
-
-POST {{TaskManager_HostAddress}}/tasks/
+### Termin w przeszlosci -> 400
+POST {{TaskManager_HostAddress}}/tasks
 Content-Type: application/json
-Accept: application/json
 
 {
     "title": "poniedzialek",
-    "projectid": 1,
+    "projectId": 1,
     "dueDate": "2020-01-01"
 }
 
-###
+### Brak tytulu -> 400
+POST {{TaskManager_HostAddress}}/tasks
+Content-Type: application/json
+
+{
+    "projectId": 1
+}
+
+### projectId = 0 -> 400
+POST {{TaskManager_HostAddress}}/tasks
+Content-Type: application/json
+
+{
+    "title": "zly projekt",
+    "projectId": 0
+}
+
+### Tekst zamiast liczby -> 400 (nie 500)
+POST {{TaskManager_HostAddress}}/tasks
+Content-Type: application/json
+
+{
+    "title": "zly typ",
+    "projectId": "abc"
+}
+
+### Edycja zadania -> 204
+PUT {{TaskManager_HostAddress}}/tasks/1
+Content-Type: application/json
+
+{
+    "title": "jednak wtorek",
+    "status": 1,
+    "projectId": 1
+}
+
+### Edycja nieistniejacego zadania -> 404
+PUT {{TaskManager_HostAddress}}/tasks/999
+Content-Type: application/json
+
+{
+    "title": "nie istnieje",
+    "projectId": 1
+}
+
+### Edycja z nieistniejacym projektem -> 400
+PUT {{TaskManager_HostAddress}}/tasks/1
+Content-Type: application/json
+
+{
+    "title": "zly projekt",
+    "projectId": 999
+}
+
+### Usuniecie zadania -> 204 (powtorzone -> 404)
+DELETE {{TaskManager_HostAddress}}/tasks/1
+
+############################################################
+# FILTROWANIE I SORTOWANIE
+############################################################
+
+### Filtr po projekcie
+GET {{TaskManager_HostAddress}}/tasks?projectId=1
+
+### Filtr po statusie (nazwa)
+GET {{TaskManager_HostAddress}}/tasks?status=Done
+
+### Filtr po statusie (liczba) -> to samo co wyzej
+GET {{TaskManager_HostAddress}}/tasks?status=2
+
+### Oba filtry naraz
+GET {{TaskManager_HostAddress}}/tasks?status=Done&projectId=1
+
+### Sortowanie po terminie (zadania bez terminu na koncu)
 GET {{TaskManager_HostAddress}}/tasks?orderBy=duedate
-Accept: application/json
+
+### Sortowanie po tytule (wielkosc liter bez znaczenia)
+GET {{TaskManager_HostAddress}}/tasks?orderBy=TITLE
+
+### Sortowanie po statusie
+GET {{TaskManager_HostAddress}}/tasks?orderBy=status
