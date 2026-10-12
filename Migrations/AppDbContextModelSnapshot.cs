@@ -30,9 +30,14 @@ namespace TaskManager.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Projects", (string)null);
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("TaskManager.Models.TaskItem", b =>
@@ -58,7 +63,40 @@ namespace TaskManager.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("TaskItems", (string)null);
+                    b.ToTable("TaskItems");
+                });
+
+            modelBuilder.Entity("TaskManager.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TaskManager.Models.Project", b =>
+                {
+                    b.HasOne("TaskManager.Models.User", "User")
+                        .WithMany("Projects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TaskManager.Models.TaskItem", b =>
@@ -75,6 +113,11 @@ namespace TaskManager.Migrations
             modelBuilder.Entity("TaskManager.Models.Project", b =>
                 {
                     b.Navigation("TaskItems");
+                });
+
+            modelBuilder.Entity("TaskManager.Models.User", b =>
+                {
+                    b.Navigation("Projects");
                 });
 #pragma warning restore 612, 618
         }
