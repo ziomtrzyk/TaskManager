@@ -6,7 +6,7 @@ using TaskManager.Models;
 
 namespace TaskManager.Services;
 
-public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher) : IAuthService
+public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher, ITokenService tokenService) : IAuthService
 {
     public async Task<bool> RegisterAsync(RegisterDto registerDto)
     {
@@ -30,6 +30,6 @@ public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher) 
         var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginDto.Password);
         if (result == PasswordVerificationResult.Failed)
             return null;
-        return new AuthResponseDto { Token = "bajojajo" };
+        return new AuthResponseDto { Token = tokenService.Generate(user)};
     }
 }

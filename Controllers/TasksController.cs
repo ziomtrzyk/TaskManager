@@ -1,11 +1,11 @@
-using System.Data.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Dtos;
 using TaskManager.Services;
 
-
 namespace TaskManager.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class TasksController(ITaskService service) : ControllerBase

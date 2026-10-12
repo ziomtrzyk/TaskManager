@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Dtos;
 using TaskManager.Services;
 
 namespace TaskManager.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class ProjectsController(IProjectService service, ITaskService taskService) : ControllerBase

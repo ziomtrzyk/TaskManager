@@ -1,4 +1,5 @@
 @TaskManager_HostAddress = http://localhost:5196
+@token = {{login.response.body.token}}
 
 ############################################################
 # AUTH
@@ -99,17 +100,28 @@ Content-Type: application/json
 # Uwaga: POST /projects zwroci 500 do czesci D (brak UserId)
 ############################################################
 
+### Bez tokenu -> 401
+GET {{TaskManager_HostAddress}}/projects
+
+### Zly token -> 401
+GET {{TaskManager_HostAddress}}/projects
+Authorization: Bearer to.nie.jest.token
+
 ### Lista projektow -> 200
 GET {{TaskManager_HostAddress}}/projects
+Authorization: Bearer {{token}}
 
 ### Projekt po id -> 200
 GET {{TaskManager_HostAddress}}/projects/1
+Authorization: Bearer {{token}}
 
 ### Nieistniejacy projekt -> 404
 GET {{TaskManager_HostAddress}}/projects/999
+Authorization: Bearer {{token}}
 
 ### Nowy projekt -> 201 (po czesci D)
 POST {{TaskManager_HostAddress}}/projects
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -119,6 +131,7 @@ Content-Type: application/json
 
 ### Projekt bez nazwy -> 400
 POST {{TaskManager_HostAddress}}/projects
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -127,6 +140,7 @@ Content-Type: application/json
 
 ### Edycja projektu -> 204
 PUT {{TaskManager_HostAddress}}/projects/1
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -136,6 +150,7 @@ Content-Type: application/json
 
 ### Edycja nieistniejacego projektu -> 404
 PUT {{TaskManager_HostAddress}}/projects/999
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -144,12 +159,15 @@ Content-Type: application/json
 
 ### Zadania projektu -> 200
 GET {{TaskManager_HostAddress}}/projects/1/tasks
+Authorization: Bearer {{token}}
 
 ### Zadania nieistniejacego projektu -> 404
 GET {{TaskManager_HostAddress}}/projects/999/tasks
+Authorization: Bearer {{token}}
 
 ### Usuniecie projektu -> 204 (powtorzone -> 404)
 DELETE {{TaskManager_HostAddress}}/projects/3
+Authorization: Bearer {{token}}
 
 ############################################################
 # ZADANIA
@@ -157,15 +175,19 @@ DELETE {{TaskManager_HostAddress}}/projects/3
 
 ### Lista zadan -> 200
 GET {{TaskManager_HostAddress}}/tasks
+Authorization: Bearer {{token}}
 
 ### Zadanie po id -> 200
 GET {{TaskManager_HostAddress}}/tasks/1
+Authorization: Bearer {{token}}
 
 ### Nieistniejace zadanie -> 404
 GET {{TaskManager_HostAddress}}/tasks/999
+Authorization: Bearer {{token}}
 
 ### Nowe zadanie -> 201
 POST {{TaskManager_HostAddress}}/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -176,6 +198,7 @@ Content-Type: application/json
 
 ### Zadanie bez statusu -> 201, status = 0 (ToDo)
 POST {{TaskManager_HostAddress}}/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -185,6 +208,7 @@ Content-Type: application/json
 
 ### Zadanie do nieistniejacego projektu -> 400
 POST {{TaskManager_HostAddress}}/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -194,6 +218,7 @@ Content-Type: application/json
 
 ### Termin w przeszlosci -> 400
 POST {{TaskManager_HostAddress}}/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -204,6 +229,7 @@ Content-Type: application/json
 
 ### Brak tytulu -> 400
 POST {{TaskManager_HostAddress}}/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -212,6 +238,7 @@ Content-Type: application/json
 
 ### projectId = 0 -> 400
 POST {{TaskManager_HostAddress}}/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -221,6 +248,7 @@ Content-Type: application/json
 
 ### Tekst zamiast liczby -> 400 (nie 500)
 POST {{TaskManager_HostAddress}}/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -230,6 +258,7 @@ Content-Type: application/json
 
 ### Edycja zadania -> 204
 PUT {{TaskManager_HostAddress}}/tasks/1
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -240,6 +269,7 @@ Content-Type: application/json
 
 ### Edycja nieistniejacego zadania -> 404
 PUT {{TaskManager_HostAddress}}/tasks/999
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -249,6 +279,7 @@ Content-Type: application/json
 
 ### Edycja z nieistniejacym projektem -> 400
 PUT {{TaskManager_HostAddress}}/tasks/1
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -258,6 +289,7 @@ Content-Type: application/json
 
 ### Usuniecie zadania -> 204 (powtorzone -> 404)
 DELETE {{TaskManager_HostAddress}}/tasks/1
+Authorization: Bearer {{token}}
 
 ############################################################
 # FILTROWANIE I SORTOWANIE
@@ -265,21 +297,28 @@ DELETE {{TaskManager_HostAddress}}/tasks/1
 
 ### Filtr po projekcie
 GET {{TaskManager_HostAddress}}/tasks?projectId=1
+Authorization: Bearer {{token}}
 
 ### Filtr po statusie (nazwa)
 GET {{TaskManager_HostAddress}}/tasks?status=Done
+Authorization: Bearer {{token}}
 
 ### Filtr po statusie (liczba) -> to samo co wyzej
 GET {{TaskManager_HostAddress}}/tasks?status=2
+Authorization: Bearer {{token}}
 
 ### Oba filtry naraz
 GET {{TaskManager_HostAddress}}/tasks?status=Done&projectId=1
+Authorization: Bearer {{token}}
 
 ### Sortowanie po terminie (zadania bez terminu na koncu)
 GET {{TaskManager_HostAddress}}/tasks?orderBy=duedate
+Authorization: Bearer {{token}}
 
 ### Sortowanie po tytule (wielkosc liter bez znaczenia)
 GET {{TaskManager_HostAddress}}/tasks?orderBy=TITLE
+Authorization: Bearer {{token}}
 
 ### Sortowanie po statusie
 GET {{TaskManager_HostAddress}}/tasks?orderBy=status
+Authorization: Bearer {{token}}
