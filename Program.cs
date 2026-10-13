@@ -7,6 +7,7 @@ using TaskManager.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TaskManager.Middleware;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,7 @@ app.UseStatusCodePages();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
