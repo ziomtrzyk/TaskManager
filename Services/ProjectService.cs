@@ -7,25 +7,26 @@ namespace TaskManager.Services;
 
 public class ProjectService(AppDbContext db) : IProjectService
 {
-    public async Task<List<ProjectDto>> GetAllAsync()
-    => await db.Projects.Select(p => p.ToDto()).ToListAsync();
+    public async Task<List<ProjectDto>> GetAllAsync(int userId)
+    => await db.Projects.Where(p => p.UserId == userId).Select(p => p.ToDto()).ToListAsync();
 
-    public async Task<ProjectDto?> GetByIdAsync(int id)
+    public async Task<ProjectDto?> GetByIdAsync(int userId, int id)
     {
-        var project = await db.Projects.FindAsync(id);
+        var project = await db.Projects.Where(p => p.UserId == userId).FirstOrDefaultAsync(p => p.Id == id);
         return project?.ToDto();
     }
-    public async Task<ProjectDto> CreateAsync(CreateProjectDto input)
+    public async Task<ProjectDto> CreateAsync(int userId, CreateProjectDto input)
     {
         var project = input.ToProject();
+        project.UserId = userId;
         db.Projects.Add(project);
         await db.SaveChangesAsync();
         return project.ToDto();
     }
 
-    public async Task<bool> UpdateAsync(int id, CreateProjectDto input)
+    public async Task<bool> UpdateAsync(int userId, int id, CreateProjectDto input)
     {
-        var project = await db.Projects.FindAsync(id);
+        var project = await db.Projects.Where(p => p.UserId == userId).FirstOrDefaultAsync(p => p.Id == id);
         if (project is null) return false;
 
         project.UpdateProject(input);
@@ -34,9 +35,9 @@ public class ProjectService(AppDbContext db) : IProjectService
         return true;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int userId, int id)
     {
-        var project = await db.Projects.FindAsync(id);
+        var project = await db.Projects.Where(p => p.UserId == userId).FirstOrDefaultAsync(p => p.Id == id);
         if (project is null) return false;
 
         db.Projects.Remove(project);
@@ -44,8 +45,8 @@ public class ProjectService(AppDbContext db) : IProjectService
         return true;
     }
 
-    public async Task<bool> ExistsAsync(int id)
+    public async Task<bool> ExistsAsync(int userId, int id)
     {
-        return await db.Projects.AnyAsync(p => p.Id == id);
+        return await db.Projects.AnyAsync(p => p.Id == id && p.UserId == userId);
     }
 }

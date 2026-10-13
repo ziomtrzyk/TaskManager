@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Dtos;
 using TaskManager.Services;
+using TaskManager.Extensions;
 
 namespace TaskManager.Controllers;
 
@@ -11,15 +12,15 @@ namespace TaskManager.Controllers;
 public class TasksController(ITaskService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<TaskDto>>> GetAll([FromQuery]TaskQuery taskQuery)
+    public async Task<ActionResult<List<TaskDto>>> GetAll([FromQuery] TaskQuery taskQuery)
     {
-        return await service.GetAllAsync(taskQuery);
+        return await service.GetAllAsync(User.GetUserId(), taskQuery);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<TaskDto>> GetById(int id)
     {
-        var found = await service.GetByIdAsync(id);
+        var found = await service.GetByIdAsync(User.GetUserId(), id);
         if (found is null)
             return NotFound();
         return found;
@@ -27,7 +28,7 @@ public class TasksController(ITaskService service) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TaskDto>> Create(CreateTaskDto input)
     {
-        var created = await service.CreateAsync(input);
+        var created = await service.CreateAsync(User.GetUserId(), input);
         if (created is null)
             return BadRequest("The project does not exist.");
 
@@ -36,7 +37,7 @@ public class TasksController(ITaskService service) : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id, CreateTaskDto input)
     {
-        return await service.UpdateAsync(id, input) switch
+        return await service.UpdateAsync(User.GetUserId(), id, input) switch
         {
             UpdateResult.Success => NoContent(),
             UpdateResult.TaskNotFound => NotFound(),
@@ -47,6 +48,6 @@ public class TasksController(ITaskService service) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        return await service.DeleteAsync(id) ? NoContent() : NotFound();
+        return await service.DeleteAsync(User.GetUserId(), id) ? NoContent() : NotFound();
     }
 }

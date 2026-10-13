@@ -4,10 +4,10 @@ namespace TaskManager.Services;
 
 public interface IProjectService
 {
-    Task<List<ProjectDto>> GetAllAsync();
-    Task<ProjectDto?> GetByIdAsync(int id);
-    Task<ProjectDto> CreateAsync(CreateProjectDto input);
-    Task<bool> UpdateAsync(int id, CreateProjectDto input);
-    Task<bool> DeleteAsync(int id);
-    Task<bool> ExistsAsync(int id);
+    Task<List<ProjectDto>> GetAllAsync(int userId);
+    Task<ProjectDto?> GetByIdAsync(int userId, int id);
+    Task<ProjectDto> CreateAsync(int userId, CreateProjectDto input);
+    Task<bool> UpdateAsync(int userId, int id, CreateProjectDto input);
+    Task<bool> DeleteAsync(int userId, int id);
+    Task<bool> ExistsAsync(int userId, int id);
 }

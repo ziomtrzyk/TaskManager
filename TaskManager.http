@@ -64,7 +64,7 @@ POST {{TaskManager_HostAddress}}/auth/login
 Content-Type: application/json
 
 {
-    "username": "bartek",
+    "username": "anna",
     "password": "haslo123"
 }
 

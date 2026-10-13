@@ -10,9 +10,9 @@ namespace TaskManager.Services;
 public class TaskService(AppDbContext db) : ITaskService
 
 {
-    public async Task<List<TaskDto>> GetAllAsync(TaskQuery taskQuery)
+    public async Task<List<TaskDto>> GetAllAsync(int userId, TaskQuery taskQuery)
     {
-        var query = db.TaskItems.AsQueryable();
+        var query = db.TaskItems.Where(t => t.Project!.UserId == userId);
         if (taskQuery.ProjectId is not null)
             query = query.Where(t => t.ProjectId == taskQuery.ProjectId);
         if (taskQuery.Status is not null)
@@ -27,9 +27,9 @@ public class TaskService(AppDbContext db) : ITaskService
         return await query.Select(t => t.ToDto()).ToListAsync();
     }
 
-    public async Task<TaskDto?> GetByIdAsync(int id)
+    public async Task<TaskDto?> GetByIdAsync(int userId, int id)
     {
-        var taskItem = await db.TaskItems.FindAsync(id);
+        var taskItem = await db.TaskItems.FirstOrDefaultAsync(t => t.Id == id && t.Project!.UserId == userId);
 
         if (taskItem is null)
             return null;
@@ -37,9 +37,9 @@ public class TaskService(AppDbContext db) : ITaskService
         return taskItem.ToDto();
     }
 
-    public async Task<TaskDto?> CreateAsync(CreateTaskDto input)
+    public async Task<TaskDto?> CreateAsync(int userId, CreateTaskDto input)
     {
-        if (!await db.Projects.AnyAsync(p => p.Id == input.ProjectId))
+        if (!await db.Projects.AnyAsync(p => p.Id == input.ProjectId && p.UserId == userId))
             return null;
 
         var taskItem = input.ToTaskItem();
@@ -48,13 +48,13 @@ public class TaskService(AppDbContext db) : ITaskService
         return taskItem.ToDto();
     }
 
-    public async Task<UpdateResult> UpdateAsync(int id, CreateTaskDto input)
+    public async Task<UpdateResult> UpdateAsync(int userId, int id, CreateTaskDto input)
     {
-        var taskItem = await db.TaskItems.FindAsync(id);
+        var taskItem = await db.TaskItems.FirstOrDefaultAsync(t => t.Id == id && t.Project!.UserId == userId);
         if (taskItem is null)
             return UpdateResult.TaskNotFound;
 
-        if (!await db.Projects.AnyAsync(p => p.Id == input.ProjectId))
+        if (!await db.Projects.AnyAsync(p => p.Id == input.ProjectId && p.UserId == userId))
             return UpdateResult.ProjectNotFound;
 
         taskItem.UpdateItem(input);
@@ -63,9 +63,9 @@ public class TaskService(AppDbContext db) : ITaskService
         return UpdateResult.Success;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int userId, int id)
     {
-        var taskItem = await db.TaskItems.FindAsync(id);
+        var taskItem = await db.TaskItems.FirstOrDefaultAsync(t => t.Id == id && t.Project!.UserId == userId);
         if (taskItem is null)
             return false;
 
