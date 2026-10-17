@@ -20,6 +20,7 @@ A REST API for managing projects and tasks, built with ASP.NET Core and Entity F
 - JWT bearer authentication (`Microsoft.AspNetCore.Authentication.JwtBearer`)
 - Password hashing with ASP.NET Core Identity's `PasswordHasher`
 - OpenAPI + [Scalar](https://scalar.com) for API documentation
+- Docker (multi-stage build, non-root runtime image)
 
 ## Project structure
 
@@ -68,13 +69,11 @@ The issuer, audience and token lifetime are in `appsettings.json`.
 
 > User Secrets are only loaded in the `Development` environment. `dotnet run` uses the `Development` profile from `launchSettings.json` by default.
 
-### 3. Create the database
+### 3. Database
 
-```bash
-dotnet ef database update
-```
+Pending EF Core migrations are applied automatically on startup, so a local `tasks.db` SQLite file is created on the first run. No manual step is needed.
 
-This creates a local `tasks.db` SQLite file.
+To apply migrations manually instead, run `dotnet ef database update`.
 
 ### 4. Run the API
 
@@ -85,6 +84,29 @@ dotnet run
 - API: `http://localhost:5196`
 - Interactive documentation: `http://localhost:5196/scalar`
 - OpenAPI document: `http://localhost:5196/openapi/v1.json`
+
+## Run with Docker
+
+Build the image:
+
+```bash
+docker build -t taskmanager .
+```
+
+Run the container. The JWT key is passed as an environment variable at runtime, so it is never stored in the image:
+
+```bash
+docker run -d --name taskmanager -p 8080:8080 \
+  -e Jwt__Key="replace-this-with-a-random-key-of-at-least-32-characters" \
+  -e ASPNETCORE_ENVIRONMENT=Development \
+  -v taskmanager-data:/app/data \
+  taskmanager
+```
+
+- API: `http://localhost:8080`
+- Interactive documentation: `http://localhost:8080/scalar`
+
+The SQLite database is stored in the `taskmanager-data` volume, so data survives removing and recreating the container. `ASPNETCORE_ENVIRONMENT=Development` enables the Scalar UI; omit it to run in `Production` mode.
 
 ## Endpoints
 
@@ -102,6 +124,7 @@ dotnet run
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/projects` | List your projects |
+| `GET` | `/projects/with-tasks` | List your projects together with their tasks |
 | `GET` | `/projects/{id}` | Get one project |
 | `GET` | `/projects/{id}/tasks` | List the tasks in a project |
 | `POST` | `/projects` | Create a project |
@@ -116,6 +139,7 @@ dotnet run
 | `GET` | `/tasks/{id}` | Get one task |
 | `POST` | `/tasks` | Create a task in one of your projects |
 | `PUT` | `/tasks/{id}` | Update a task |
+| `POST` | `/tasks/{id}/complete` | Mark a task as `Done` and create a follow-up task in one transaction. Returns `400` if the target project is not yours |
 | `DELETE` | `/tasks/{id}` | Delete a task |
 
 Query parameters for `GET /tasks`:
