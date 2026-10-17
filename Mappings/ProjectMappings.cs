@@ -11,6 +11,12 @@ public static class ProjectMappings
         Name = input.Name,
         Description = input.Description
     };
+    public static ProjectWithTaskDto ToDtoWithTasks(this Project input) => new (){
+        Id = input.Id,
+        Name = input.Name,
+        Description = input.Description,
+        Tasks = input.TaskItems.Select(t => t.ToDto()).ToList()
+    };
 
     public static Project ToProject(this CreateProjectDto input) => new()
     {

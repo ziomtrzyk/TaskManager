@@ -10,4 +10,5 @@ public interface IProjectService
     Task<bool> UpdateAsync(int userId, int id, CreateProjectDto input);
     Task<bool> DeleteAsync(int userId, int id);
     Task<bool> ExistsAsync(int userId, int id);
+    Task<List<ProjectWithTaskDto>> GetAllWithTasksAsync(int userId);
 }

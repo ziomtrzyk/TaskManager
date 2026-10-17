@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TaskManager.Data;
 using TaskManager.Dtos;
 using TaskManager.Mappings;
+using TaskManager.Models;
 
 namespace TaskManager.Services;
 
@@ -48,5 +49,18 @@ public class ProjectService(AppDbContext db) : IProjectService
     public async Task<bool> ExistsAsync(int userId, int id)
     {
         return await db.Projects.AnyAsync(p => p.Id == id && p.UserId == userId);
+    }
+    public async Task<List<ProjectWithTaskDto>> GetAllWithTasksAsync(int userId)
+    {
+        var projects = await db.Projects.Where(p => p.UserId == userId).ToListAsync();
+
+        foreach (var project in projects)
+        {
+            project.TaskItems = await db.TaskItems
+                .Where(t => t.ProjectId == project.Id)
+                .ToListAsync();
+        }
+
+        return projects.Select(p => p.ToDtoWithTasks()).ToList();
     }
 }

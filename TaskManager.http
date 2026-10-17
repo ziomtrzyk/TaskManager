@@ -100,6 +100,10 @@ Content-Type: application/json
 # Uwaga: POST /projects zwroci 500 do czesci D (brak UserId)
 ############################################################
 
+### Projects with tasks (N+1 demo)
+GET {{TaskManager_HostAddress}}/projects/with-tasks
+Authorization: Bearer {{token}}
+
 ### Bez tokenu -> 401
 GET {{TaskManager_HostAddress}}/projects
 
@@ -125,8 +129,8 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name": "Learn German",
-    "description": "Nauczyc sie niemieckiego w stopniu komunikatywnym"
+    "name": "Toaleta",
+    "description": "Posprzątac kibel i wanne"
 }
 
 ### Projekt bez nazwy -> 400

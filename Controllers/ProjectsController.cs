@@ -68,4 +68,8 @@ public class ProjectsController(IProjectService service, ITaskService taskServic
 
         return NoContent();
     }
+    [HttpGet("with-tasks")]
+    [ProducesResponseType<List<ProjectWithTaskDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<ProjectWithTaskDto>>> GetAllWithTasks()
+        => await service.GetAllWithTasksAsync(User.GetUserId());
 }
