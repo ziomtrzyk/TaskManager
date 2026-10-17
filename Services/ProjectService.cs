@@ -52,14 +52,10 @@ public class ProjectService(AppDbContext db) : IProjectService
     }
     public async Task<List<ProjectWithTaskDto>> GetAllWithTasksAsync(int userId)
     {
-        var projects = await db.Projects.Where(p => p.UserId == userId).ToListAsync();
-
-        foreach (var project in projects)
-        {
-            project.TaskItems = await db.TaskItems
-                .Where(t => t.ProjectId == project.Id)
-                .ToListAsync();
-        }
+        var projects = await db.Projects
+            .Where(p => p.UserId == userId)
+            .Include(p => p.TaskItems)
+            .ToListAsync();
 
         return projects.Select(p => p.ToDtoWithTasks()).ToList();
     }
