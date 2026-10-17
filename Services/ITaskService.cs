@@ -9,6 +9,7 @@ public interface ITaskService
     Task<TaskDto?> CreateAsync(int userId, CreateTaskDto input);
     Task<UpdateResult> UpdateAsync(int userId, int id, CreateTaskDto input);
     Task<bool> DeleteAsync(int userId, int id);
+    Task<(UpdateResult Result,TaskDto? FollowUP)> CompleteWithFollowUpAsync(int userId, int id, CompleteTaskDto input);
 }
 
 public enum UpdateResult

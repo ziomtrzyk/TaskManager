@@ -1,6 +1,26 @@
 @TaskManager_HostAddress = http://localhost:5196
 @token = {{login.response.body.token}}
 
+### Complete task with follow-up (success)
+POST {{TaskManager_HostAddress}}/tasks/1/complete
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "followUpTitle": "Follow-up task",
+  "followUpProjectId": 2
+}
+
+### Complete task with follow-up (non-existent project -> rollback)
+POST {{TaskManager_HostAddress}}/tasks/2/complete
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "followUpTitle": "Should not exist",
+  "followUpProjectId": 999
+}
+
 ############################################################
 # AUTH
 ############################################################
@@ -182,7 +202,7 @@ GET {{TaskManager_HostAddress}}/tasks
 Authorization: Bearer {{token}}
 
 ### Zadanie po id -> 200
-GET {{TaskManager_HostAddress}}/tasks/1
+GET {{TaskManager_HostAddress}}/tasks/2 
 Authorization: Bearer {{token}}
 
 ### Nieistniejace zadanie -> 404

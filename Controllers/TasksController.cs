@@ -62,4 +62,20 @@ public class TasksController(ITaskService service) : ControllerBase
     {
         return await service.DeleteAsync(User.GetUserId(), id) ? NoContent() : NotFound();
     }
+    [HttpPost("{id}/complete")]
+    [ProducesResponseType<TaskDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<TaskDto>> Complete(int id, CompleteTaskDto input)
+    {
+        var (result, followUp) = await service.CompleteWithFollowUpAsync(User.GetUserId(), id, input);
+
+        return result switch
+        {
+            UpdateResult.Success => Ok(followUp),
+            UpdateResult.TaskNotFound => NotFound(),
+            UpdateResult.ProjectNotFound => BadRequest("The project does not exist."),
+            _=> StatusCode(500)
+        };
+    }
 }

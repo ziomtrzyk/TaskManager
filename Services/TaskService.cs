@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TaskManager.Data;
 using TaskManager.Dtos;
 using TaskManager.Mappings;
+using TaskManager.Models;
 
 
 namespace TaskManager.Services;
@@ -74,5 +75,26 @@ public class TaskService(AppDbContext db) : ITaskService
         db.TaskItems.Remove(taskItem);
         await db.SaveChangesAsync();
         return true;
+    }
+    public async Task<(UpdateResult Result,TaskDto? FollowUP)> CompleteWithFollowUpAsync(int userId, int id, CompleteTaskDto input)
+    {
+        var taskItem = await db.TaskItems.FirstOrDefaultAsync(t => t.Id == id && t.Project!.UserId == userId);
+        if(taskItem is null)
+            return (UpdateResult.TaskNotFound, null);
+        
+        if(!await db.Projects.AnyAsync(p => p.Id == input.FollowUpProjectId && p.UserId == userId))
+            return (UpdateResult.ProjectNotFound, null);
+
+        taskItem.Status = TaskState.Done;
+
+        var followUp = new TaskItem
+        {
+            Title = input.FollowUpTitle,
+            ProjectId = input.FollowUpProjectId
+        };
+        db.TaskItems.Add(followUp);
+
+        await db.SaveChangesAsync();
+        return (UpdateResult.Success, followUp.ToDto());
     }
 }
