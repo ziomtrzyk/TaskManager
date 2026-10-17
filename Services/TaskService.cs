@@ -29,7 +29,9 @@ public class TaskService(AppDbContext db) : ITaskService
 
     public async Task<TaskDto?> GetByIdAsync(int userId, int id)
     {
-        var taskItem = await db.TaskItems.FirstOrDefaultAsync(t => t.Id == id && t.Project!.UserId == userId);
+        var taskItem = await db.TaskItems
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == id && t.Project!.UserId == userId);
 
         if (taskItem is null)
             return null;
