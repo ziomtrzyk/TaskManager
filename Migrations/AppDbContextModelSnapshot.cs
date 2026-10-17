@@ -61,7 +61,7 @@ namespace TaskManager.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("ProjectId", "Status");
 
                     b.ToTable("TaskItems");
                 });

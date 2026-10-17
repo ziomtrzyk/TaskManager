@@ -16,5 +16,8 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
         .HasIndex(u => u.Username)
         .IsUnique();
+
+        modelBuilder.Entity<TaskItem>()
+            .HasIndex(t => new { t.ProjectId, t.Status});
     }
 }
