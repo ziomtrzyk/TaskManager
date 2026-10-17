@@ -312,7 +312,7 @@ GET {{TaskManager_HostAddress}}/tasks?status=Done&projectId=1
 Authorization: Bearer {{token}}
 
 ### Sortowanie po terminie (zadania bez terminu na koncu)
-GET {{TaskManager_HostAddress}}/tasks?orderBy=duedate
+GET {{TaskManager_HostAddress}}/tasks?orderBy=duedate&status=0
 Authorization: Bearer {{token}}
 
 ### Sortowanie po tytule (wielkosc liter bez znaczenia)
