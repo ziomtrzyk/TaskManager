@@ -8,9 +8,9 @@ namespace TaskManager.Services;
 
 public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher, ITokenService tokenService) : IAuthService
 {
-    public async Task<bool> RegisterAsync(RegisterDto registerDto)
+    public async Task<bool> RegisterAsync(RegisterDto registerDto, CancellationToken cancellationToken)
     {
-        if (await db.Users.AnyAsync(u => u.Username == registerDto.Username))
+        if (await db.Users.AnyAsync(u => u.Username == registerDto.Username, cancellationToken))
             return false;
         var user = new User
         {
@@ -18,12 +18,12 @@ public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher, 
         };
         user.PasswordHash = passwordHasher.HashPassword(user, registerDto.Password);
         db.Users.Add(user);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(cancellationToken);
         return true;
     }
-    public async Task<AuthResponseDto?> LoginAsync(LoginDto loginDto)
+    public async Task<AuthResponseDto?> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken)
     {
-        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == loginDto.Username);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == loginDto.Username, cancellationToken);
         if (user == null)
             return null;
 

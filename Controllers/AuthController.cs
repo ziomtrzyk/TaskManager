@@ -12,9 +12,9 @@ public class AuthController(IAuthService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult> Register(RegisterDto registerDto)
+    public async Task<ActionResult> Register(RegisterDto registerDto, CancellationToken cancellationToken)
     {
-        var iscreated = await service.RegisterAsync(registerDto);
+        var iscreated = await service.RegisterAsync(registerDto, cancellationToken);
         if(!iscreated)
             return Conflict("Username is already taken.");
         return Created();
@@ -23,9 +23,9 @@ public class AuthController(IAuthService service) : ControllerBase
     [ProducesResponseType<AuthResponseDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
+    public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto, CancellationToken cancellationToken)
     {
-        var login = await service.LoginAsync(loginDto);
+        var login = await service.LoginAsync(loginDto, cancellationToken);
         if(login is null)
             return Unauthorized("Invalid username or password.");
         return login;

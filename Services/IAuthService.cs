@@ -4,6 +4,6 @@ namespace TaskManager.Services;
 
 public interface IAuthService
 {
-    Task<bool> RegisterAsync(RegisterDto registerDto);
-    Task<AuthResponseDto?> LoginAsync(LoginDto loginDto);
+    Task<bool> RegisterAsync(RegisterDto registerDto, CancellationToken cancellationToken);
+    Task<AuthResponseDto?> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken);
 }
