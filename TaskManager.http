@@ -1,6 +1,9 @@
 @TaskManager_HostAddress = http://localhost:5196
 @token = {{login.response.body.token}}
 
+###
+GET {{TaskManager_HostAddress}}/boom
+
 ### Complete task with follow-up (success)
 POST {{TaskManager_HostAddress}}/tasks/1/complete
 Authorization: Bearer {{token}}

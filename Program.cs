@@ -10,6 +10,7 @@ using TaskManager.Middleware;
 using Scalar.AspNetCore;
 using TaskManager.Options;
 using Microsoft.Extensions.Options;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +65,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
+app.UseMiddleware<RequestTimingMiddleware>();
 
 app.UseExceptionHandler();
 
@@ -81,6 +83,11 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.MapGet("/boom", () =>
+{
+    throw new InvalidOperationException("Test exception");
+});
 
 app.MapControllers();
 
