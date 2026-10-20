@@ -3,14 +3,15 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using 	Microsoft.IdentityModel.JsonWebTokens;
 using TaskManager.Models;
+using Microsoft.Extensions.Options;
+using TaskManager.Options;
 namespace TaskManager.Services;
 
-public class TokenService(IConfiguration config): ITokenService
+public class TokenService(IOptions<JwtOptions> options): ITokenService
 {
     public string Generate(User user)
     {
-        var key = config["Jwt:Key"]
-            ?? throw new InvalidOperationException("Brak Jwt:Key, ustaw go przez dotnet user-secrets set");
+        var jwt = options.Value;
 
         var claims = new[]
         {
@@ -18,20 +19,15 @@ public class TokenService(IConfiguration config): ITokenService
             new Claim(ClaimTypes.Name, user.Username)
         };
 
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key));
         var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
         var descriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Issuer = config["Jwt:Issuer"]
-                ?? throw new InvalidOperationException("Jwt:Issuer jest null"),
-            Audience = config["Jwt:Audience"]
-                ?? throw new InvalidOperationException("Jwt:Audience jest null"),
-            Expires = DateTime.UtcNow.AddMinutes(
-                config.GetValue<int?>("Jwt:ExpiresInMinutes")
-                ?? throw new InvalidOperationException("Jwt:ExpiresInMinutes jest null")
-            ),
+            Issuer = jwt.Issuer,
+            Audience = jwt.Audience,
+            Expires = DateTime.UtcNow.AddMinutes(jwt.ExpiresInMinutes),
             SigningCredentials = credentials
         };
 
